@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ORNAMENT MANAGEMENT SYSTEM</title>
+
+<style>
+body{
+margin:0;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#111;
+font-family:Arial;
+}
+
+.box{
+width:520px;
+padding:25px;
+border-radius:12px;
+background:linear-gradient(135deg,#FFD700,#FFB700,#D4AF37,#FFDF00);
+box-shadow: inset 0 0 10px rgba(255,255,255,0.6),
+0 0 25px rgba(255,215,0,0.7);
+display:none;
+}
+
+#loginBox{display:block;}
+
+input,select{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:6px;
+}
+
+button{
+width:100%;
+padding:8px;
+margin-top:6px;
+border:none;
+border-radius:6px;
+background:linear-gradient(to bottom,#fff2b0,#d4af37);
+font-weight:bold;
+cursor:pointer;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+grid-template-rows:auto auto;
+gap:15px;
+}
+
+.logoBtn{
+height:120px;
+border-radius:15px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+font-size:18px;
+font-weight:bold;
+color:white;
+cursor:pointer;
+box-shadow:0 5px 15px rgba(0,0,0,.3);
+}
+
+.icon{font-size:40px;margin-bottom:5px;}
+
+.purchase{background:#2ecc71;}
+.sale{background:#e74c3c;}
+.stock{background:#3498db;}
+.records{background:#9b59b6;}
+
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{border:1px solid black;padding:6px;background:#fff9c4;}
+
+@media print{
+body *{visibility:hidden;}
+#printArea,#printArea *{visibility:visible;}
+#printArea{position:absolute;left:0;top:0;width:100%;}
+button{display:none;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="loginBox">
+<h2>ORNAMENT MANAGEMENT SYSTEM</h2>
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+
+<div class="box" id="dashboardBox">
+<h2>Dashboard</h2>
+<div class="grid">
+
+<div class="logoBtn purchase" onclick="openPurchase()">
+<div class="icon">🟢</div>Purchase</div>
+
+<div class="logoBtn sale" onclick="openSale()">
+<div class="icon">🔴</div>Sales</div>
+
+<div class="logoBtn stock" onclick="openStock()">
+<div class="icon">📦</div>Stock</div>
+
+<div class="logoBtn records" onclick="showList()">
+<div class="icon">📋</div>Records</div>
+
+</div>
+
+<button onclick="openChangePassword()">Change Password</button>
+<button onclick="logout()">Logout</button>
+</div>
+
+<div class="box" id="passwordBox">
+<h2>Change Password</h2>
+<input id="oldPass" type="password" placeholder="Old Password">
+<input id="newPass" type="password" placeholder="New Password">
+<button onclick="changePassword()">Save</button>
+<button onclick="back()">Back</button>
+</div>
+
+<div class="box" id="entryBox">
+<h2 id="entryTitle"></h2>
+
+<select id="type">
+<option value="purchase">Purchase</option>
+<option value="sale">Sale</option>
+</select>
+
+<input id="name" placeholder="Customer Name">
+<input id="mobile" placeholder="Mobile">
+<input id="address" placeholder="Address">
+<input id="item" placeholder="Item">
+<input id="weight" type="number" placeholder="Weight">
+<input id="qty" type="number" placeholder="Qty">
+<input id="rate" type="number" placeholder="Rate">
+
+<button onclick="save()">Save</button>
+<button onclick="back()">Back</button>
+</div>
+
+<div class="box" id="receiptBox">
+<div id="receiptData"></div>
+<button onclick="window.print()">Print</button>
+<button onclick="newEntry()">New</button>
+<button onclick="back()">Back</button>
+</div>
+
+<div class="box" id="listBox">
+<h2>Records</h2>
+
+<input id="search" placeholder="Search Customer" onkeyup="searchRecord()">
+
+<label>From Date</label>
+<input type="date" id="fromDate">
+
+<label>To Date</label>
+<input type="date" id="toDate">
+
+<button onclick="filterByDate()">Filter</button>
+
+<table id="table"></table>
+<button onclick="back()">Back</button>
+</div>
+
+<div class="box" id="stockBox">
+<h2>Stock</h2>
+<input id="stockItem" placeholder="Item">
+<input id="stockWeight" type="number" placeholder="Weight">
+<input id="stockQty" type="number" placeholder="Qty">
+<button onclick="addStock()">Add Stock</button>
+<button onclick="showAllStock()">Show All Stock</button>
+<table id="stockTable"></table>
+<button onclick="showStock()">Current Stock</button>
+<button onclick="back()">Back</button>
+</div>
+
+<script>
+
+function login(){
+let savedPass=localStorage.getItem("pass")||"1234";
+if(username.value=="Amit" && password.value==savedPass){
+loginBox.style.display="none";
+dashboardBox.style.display="block";
+}
+}
+
+function logout(){
+dashboardBox.style.display="none";
+loginBox.style.display="block";
+}
+
+function openChangePassword(){
+dashboardBox.style.display="none";
+passwordBox.style.display="block";
+}
+
+function changePassword(){
+let savedPass=localStorage.getItem("pass")||"1234";
+if(oldPass.value==savedPass){
+localStorage.setItem("pass",newPass.value);
+alert("Password Changed");
+back();
+}else{
+alert("Wrong Old Password");
+}
+}
+
+function openPurchase(){
+dashboardBox.style.display="none";
+entryBox.style.display="block";
+entryTitle.innerText="Purchase Entry";
+type.value="purchase";
+}
+
+function openSale(){
+dashboardBox.style.display="none";
+entryBox.style.display="block";
+entryTitle.innerText="Sale Entry";
+type.value="sale";
+}
+
+function openStock(){
+dashboardBox.style.display="none";
+stockBox.style.display="block";
+}
+
+function save(){
+
+let cname=document.getElementById("name").value;
+let total=(Number(weight.value)||0)*(Number(rate.value)||0);
+
+let entry={
+type:type.value,
+name:cname,
+mobile:mobile.value,
+address:address.value,
+item:item.value,
+weight:weight.value,
+qty:qty.value,
+rate:rate.value,
+total:total,
+date:new Date().toLocaleString()
+};
+
+let data=JSON.parse(localStorage.getItem("gold"))||[];
+data.push(entry);
+localStorage.setItem("gold",JSON.stringify(data));
+
+showReceipt(entry);
+}
+
+function showReceipt(d){
+entryBox.style.display="none";
+receiptBox.style.display="block";
+
+receiptData.innerHTML=`
+<div id="printArea">
+
+<h2 style="text-align:center;margin:0">
+Amit Kumar Jewellers 💎
+</h2>
+
+<p style="text-align:center;margin:0">
+<B>Address</B>: Sanjay nagar Bareilly, Uttar Pradesh
+</p>
+
+<p style="text-align:center;margin:0">
+<B>Mobile</B> : 8439247447 , 9389292890
+</p>
+
+<hr>
+
+<b>Date :</b> ${d.date}<br><br>
+
+<b>Customer Name :</b> ${d.name}<br>
+<b>Mobile :</b> ${d.mobile}<br>
+<b>Address :</b> ${d.address}<br>
+
+<hr>
+
+<b>Item :</b> ${d.item}<br>
+<b>Weight :</b> ${d.weight} gram<br>
+<b>Qty :</b> ${d.qty}<br>
+<b>Rate :</b> ₹${d.rate} per gram<br>
+
+<hr>
+
+<h3>Total : ₹${d.total}</h3>
+<center> Thank you visit again 🙏🏻 </center>
+</div>
+
+`;
+}
+
+function showList(){
+let data=JSON.parse(localStorage.getItem("gold"))||[];
+renderTable(data);
+dashboardBox.style.display="none";
+listBox.style.display="block";
+}
+
+function renderTable(data){
+let html="<tr><th>Name</th><th>Item</th><th>Total</th><th>Date</th><th>Action</th></tr>";
+data.forEach((d,i)=>{
+html+=`
+<tr>
+<td>${d.name}</td>
+<td>${d.item}</td>
+<td>${d.total}</td>
+<td>${d.date}</td>
+<td>
+<button onclick="editRecord(${i})">Edit</button>
+<button onclick="deleteRecord(${i})">Delete</button>
+</td>
+</tr>`;
+});
+table.innerHTML=html;
+}
+
+function filterByDate(){
+let from=new Date(fromDate.value);
+let to=new Date(toDate.value);
+
+let data=JSON.parse(localStorage.getItem("gold"))||[];
+
+let filtered=data.filter(d=>{
+let recordDate=new Date(d.date);
+return recordDate>=from && recordDate<=to;
+});
+
+renderTable(filtered);
+}
+
+function deleteRecord(i){
+let data=JSON.parse(localStorage.getItem("gold"))||[];
+data.splice(i,1);
+localStorage.setItem("gold",JSON.stringify(data));
+showList();
+}
+
+function editRecord(i){
+let data=JSON.parse(localStorage.getItem("gold"))||[];
+let d=data[i];
+
+name.value=d.name;
+mobile.value=d.mobile;
+address.value=d.address;
+item.value=d.item;
+weight.value=d.weight;
+qty.value=d.qty;
+rate.value=d.rate;
+type.value=d.type;
+
+data.splice(i,1);
+localStorage.setItem("gold",JSON.stringify(data));
+
+listBox.style.display="none";
+entryBox.style.display="block";
+}
+
+function searchRecord(){
+let input=search.value.toLowerCase();
+let rows=table.getElementsByTagName("tr");
+
+for(let i=1;i<rows.length;i++){
+let name=rows[i].cells[0].innerText.toLowerCase();
+rows[i].style.display=name.includes(input)?"":"none";
+}
+}
+
+function addStock(){
+let data=JSON.parse(localStorage.getItem("stock"))||[];
+
+data.push({
+item:stockItem.value,
+weight:stockWeight.value,
+qty:stockQty.value,
+date:new Date().toLocaleString()
+});
+
+localStorage.setItem("stock",JSON.stringify(data));
+alert("Stock added");
+}
+
+function showAllStock(){
+let data=JSON.parse(localStorage.getItem("stock"))||[];
+
+let html="<tr><th>Item</th><th>Weight</th><th>Qty</th><th>Date</th></tr>";
+
+data.forEach(d=>{
+html+=`<tr>
+<td>${d.item}</td>
+<td>${d.weight}</td>
+<td>${d.qty}</td>
+<td>${d.date}</td>
+</tr>`;
+});
+
+stockTable.innerHTML=html;
+}
+
+function showStock(){
+let data=JSON.parse(localStorage.getItem("gold"))||[];
+
+let purchase=0;
+let sale=0;
+
+data.forEach(d=>{
+let w = Number(d.weight) * (Number(d.qty)||1);
+if(d.type=="purchase") purchase+=w;
+else sale+=w;
+});
+
+alert("Current Stock : "+(purchase-sale)+" gram");
+}
+
+function newEntry(){
+receiptBox.style.display="none";
+entryBox.style.display="block";
+}
+
+function back(){
+entryBox.style.display="none";
+receiptBox.style.display="none";
+listBox.style.display="none";
+stockBox.style.display="none";
+passwordBox.style.display="none";
+dashboardBox.style.display="block";
+}
+
+</script>
+
+</body>
+</html>
